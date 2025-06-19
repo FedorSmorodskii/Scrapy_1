@@ -1,37 +1,14 @@
-import random
-from urllib.parse import urlparse
-from scrapy import signals
-from scrapy.exceptions import NotConfigured
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.utils.response import response_status_message
+from random import choice
 
-
-class ProxyMiddleware:
-    def __init__(self, proxy_list):
-        self.proxy_list = proxy_list
-
-    @classmethod
-    def from_crawler(cls, crawler):
-        # Проверяем, включены ли прокси в настройках
-        if not crawler.settings.getbool('USE_PROXY'):
-            raise NotConfigured('Proxy middleware disabled by settings')
-
-        proxy_list = crawler.settings.getlist('PROXY_LIST', [])
-        if not proxy_list:
-            raise NotConfigured('PROXY_LIST is empty')
-
-        return cls(proxy_list)
-
-    def process_request(self, request, spider):
-        if request.meta.get('proxy') is None:
-            return
-
-        proxy = random.choice(self.proxy_list)
-        request.meta['proxy'] = proxy
-        spider.logger.debug(f'Using proxy: {proxy}')
-
-class RegionMiddleware:
-    def process_request(self, request, spider):
-        # Устанавливаем Краснодар
-        parsed_url = urlparse(request.url)
-        if 'alkoteka.com' in parsed_url.netloc:
-            request.cookies['region'] = 'krasnodar'
-            request.headers['X-Region'] = 'krasnodar'
+class CustomRetryMiddleware(RetryMiddleware):
+    def process_response(self, request, response, spider):
+        if response.status in [403, 429] and getattr(spider, 'use_proxy', False):
+            reason = response_status_message(response.status)
+            if hasattr(spider, 'proxy_pool') and spider.proxy_pool:
+                new_proxy = choice(spider.proxy_pool)
+                spider.logger.warning(f'Switching proxy to {new_proxy} after {response.status} response')
+                request.meta['proxy'] = new_proxy
+                return self._retry(request, reason, spider) or response
+        return response
