@@ -1,3 +1,4 @@
+
 # Парсер товаров Alkoteka
 
 Scrapy-паук для сбора данных о продуктах с сайта alkoteka.com.
@@ -16,27 +17,31 @@ Scrapy-паук для сбора данных о продуктах с сайт
 pip install scrapy
 ```
 
-# Использование
-## Базовый запуск (без прокси)
+## Использование
+
+### Базовый запуск (без прокси)
 ```bash
-scrapy runspider alkoteka_spider.py
+cd alkoteka_parser/alkoteka_parser/spiders
+scrapy crawl alkoteka
 ```
 
-## С поддержкой прокси
+### С поддержкой прокси
 ```bash
-scrapy runspider alkoteka_spider.py -a use_proxy=True
+cd alkoteka_parser/alkoteka_parser/spiders
+scrapy crawl alkoteka -a use_proxy=True
 ```
 
-## С указанием региона
+### С указанием региона
 ```bash
-scrapy runspider alkoteka_spider.py -a region_uuid=ваш_uuid_региона
+cd alkoteka_parser/alkoteka_parser/spiders
+scrapy crawl alkoteka -a region_uuid=ваш_uuid_региона
 ```
 
-## Со всеми параметрами
+### Со всеми параметрами
 ```bash
-scrapy runspider alkoteka_spider.py -a start_url="https://alkoteka.com/category" region_uuid="ваш_uuid" use_proxy=True
+cd alkoteka_parser/alkoteka_parser/spiders
+scrapy crawl alkoteka -a start_url="https://alkoteka.com/category" region_uuid="ваш_uuid" use_proxy=True
 ```
-
 
 ### В случае технических шоколадок
 ```bash
